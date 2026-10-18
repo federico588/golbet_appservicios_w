@@ -24,16 +24,17 @@ public class MatchesController : Controller
 
     // GET /Matches?status=Scheduled -> filtered board 
 
-    public async Task<IActionResult> Index(MatchStatus? status)
-
+    // GET /Matches
+    // GET /Matches?status=Scheduled
+    // GET /Matches?search=Nacional
+    // GET /Matches?status=Scheduled&search=Nacional
+    public async Task<IActionResult> Index(MatchStatus? status, string? search)
     {
-
         ViewBag.CurrentStatus = status;
+        ViewBag.Search = search;
 
-        var board = await _matchService.GetBoardAsync(status);
-
+        var board = await _matchService.GetBoardAsync(status, search);
         return View(board);
-
     }
 
     // GET /Matches/Detail/3 

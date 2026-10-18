@@ -46,4 +46,15 @@ public class MatchRepository : GenericRepository<Match>, IMatchRepository
             .AsNoTracking()
             .FirstOrDefaultAsync(m => m.Id == id);
 
+    public async Task<IEnumerable<Match>> SearchByTeamAsync(string teamName)
+    {
+        var text = teamName.Trim().ToLower();
+
+        return await _context.Matches
+            .Include(m => m.HomeTeam)
+            .Include(m => m.AwayTeam)
+            .Where(m => m.HomeTeam.Name.ToLower().Contains(text)
+                     || m.AwayTeam.Name.ToLower().Contains(text))
+            .ToListAsync();
+    }
 }

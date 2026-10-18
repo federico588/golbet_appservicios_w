@@ -22,10 +22,17 @@ public class MatchService : IMatchService
 
         _mapper = mapper;
     }
-    public async Task<IEnumerable<MatchDto>> GetBoardAsync(MatchStatus? status = null)
-
+    public async Task<IEnumerable<MatchDto>> GetBoardAsync(MatchStatus? status = null, string? search = null)
     {
         var matches = await _matchRepository.GetAllWithTeamsAsync(status);
+
+        if (!string.IsNullOrWhiteSpace(search))
+        {
+            var text = search.Trim().ToLower();
+            matches = matches.Where(m =>
+                m.HomeTeam.Name.ToLower().Contains(text) ||
+                m.AwayTeam.Name.ToLower().Contains(text));
+        }
 
         return _mapper.Map<IEnumerable<MatchDto>>(matches);
     }
@@ -38,6 +45,14 @@ public class MatchService : IMatchService
 
         return match is null ? null : _mapper.Map<MatchDetailDto>(match);
 
+    }
+    public async Task<IEnumerable<MatchDto>> SearchByTeamAsync(string teamName)
+    {
+        var matches = string.IsNullOrWhiteSpace(teamName)
+            ? await _matchRepository.GetAllAsync()
+            : await _matchRepository.SearchByTeamAsync(teamName);
+
+        return _mapper.Map<IEnumerable<MatchDto>>(matches); // o tu forma de mapear
     }
 
     public async Task<MatchFormDto?> GetForEditAsync(int id)
